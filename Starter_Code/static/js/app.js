@@ -1,74 +1,34 @@
-//Define URL
-const url = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json"
-
-//Fetch the JSON data and console log it
-let data = d3.json(url).then(function(data)) {
-    console.log(data);
-};
-      
-    // Filter the metadata for the object with the desired sample number
-      var metadata = data.metadata.filter(obj => obj.id == sample)[0];
-
-    // Use d3 to select the panel with id of `#sample-metadata`
-      var metadataPanel = d3.select("#sample-metadata");
-
-    // Use `.html("") to clear any existing metadata
-      metadataPanel.html("");
-
-    // Inside a loop, use d3 to append new tags for each key-value pair in the filtered metadata.
-    Object.entries(metadata).forEach(([key, value]) => {
-      metadataPanel.append("p").text(`${key}: ${value}`);
-    });
-};
-
-// function to build both charts
-function buildCharts(sample) {
-  d3.json("https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json").then((data) => {
-
-    // Get the samples field
-  var samples = data.samples;
-
-    // Filter the samples for the object with the desired sample number
-  var sampleData = samples.filter(obj => obj.id == sample) [0];
-
-    // Get the otu_ids, otu_labels, and sample_values
-  var otuIds = sampleData.otu_ids;
-  var otuLabels = sampleData.otu_labels;
-  var sampleValues = sampleData.sample_values;
-
-    // Build a Bubble Chart
-  let trace1 = {
-    x: otuIds,
-    y: sampleValues,
-    mode: otuLabels,
-    marker: {
-    sampleValues,
-    color: otuIds,
-  },
-  text: otuLabels
-};
-
-    // Render the Bubble Chart
-    var data = [trace1];
-
-    var layout = {
-      title: 'Bacteria Cultures Per Sample',
-      showlegend: false,
-      height: 600,
-      width: 600
-    };
-    
-    Plotly.newPlot('myDiv', data, layout);
-  });
-}
-document.getElementById('myDiv');
-//
 document.addEventListener("DOMContentLoaded", function() {
   const url = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json";
 
   // Fetch the JSON data and console log it
   d3.json(url).then(function(data) {
     console.log(data);
+
+      // Function to build bubble chart
+    function buildBubbleChart(sample) {
+    var sampleData = data.samples.filter(obj => obj.id == sample)[0];
+    var trace = {
+      x: sampleData.otu_ids,
+      y: sampleData.sample_values,
+      mode: 'markers',
+      marker: {
+        size: sampleData.sample_values,
+        color: sampleData.otu_ids,
+        colorscale: 'Earth',
+        type: 'heatmap'
+      },
+      text: sampleData.otu_labels
+    };
+    var layout = {
+      title: "Bacteria Cultures Per Sample",
+      showlegend: false,
+      xaxis: { title: "OTU ID" },
+      yaxis: { title: "Sample Value" }
+    };
+    var data = [trace];
+    Plotly.newPlot("bubble", data, layout);
+  }
 
     // Function to build metadata panel
     function buildMetadata(sample) {
@@ -102,10 +62,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       };
       var data = [trace];
-      Plotly.newPlot("plot", data, layout);
+      Plotly.newPlot("bar", data, layout);
     }
 
-    // Function to initialize the dashboard
+    // Function to initialize the dashboard and dropdown menu
     function init() {
       var dropdownMenu = d3.select("#selDataset");
       var sampleNames = data.names;
@@ -117,22 +77,19 @@ document.addEventListener("DOMContentLoaded", function() {
       var firstSample = sampleNames[0];
       buildMetadata(firstSample);
       buildBarChart(firstSample);
+      buildBubbleChart(firstSample); // Call function to build bubble chart
     }
 
-    // Call init to initialize the dashboard
-    init();
+    // Initialize the dashboard
+    //init();
 
     // Function for event listener
     function optionChanged(sampleID) {
       buildMetadata(sampleID);
       buildBarChart(sampleID);
+      buildBubbleChart(sampleID);
     }
   }).catch(function(error) {
     console.error("Error fetching data:", error);
   });
 });
-
-  
-// Initialize the dashboard
-init()
-
