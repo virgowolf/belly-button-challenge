@@ -74,21 +74,24 @@ document.addEventListener("DOMContentLoaded", function() {
           .text(name)
           .property("value", name);
       });
-      var firstSample = sampleNames[0];
-      buildMetadata(firstSample);
-      buildBarChart(firstSample);
-      buildBubbleChart(firstSample); // Call function to build bubble chart
+
+      // Call function to build charts for the first sample
+      buildMetadata(sampleNames[0]);
+      buildBarChart(sampleNames[0]);
+      buildBubbleChart(sampleNames[0]);
     }
 
     // Initialize the dashboard
     init();
 
-    // Function for event listener
-    function optionChanged(sampleID) {
-      buildMetadata(sampleID);
-      buildBarChart(sampleID);
-      buildBubbleChart(sampleID);
-    }
+    // Event listener for the dropdown menu
+    d3.select("#selDataset").on("change", function() {
+      var selectedSampleID = d3.select(this).property("value");
+      buildMetadata(selectedSampleID);
+      buildBarChart(selectedSampleID);
+      buildBubbleChart(selectedSampleID);
+    });
+
   }).catch(function(error) {
     console.error("Error fetching data:", error);
   });
