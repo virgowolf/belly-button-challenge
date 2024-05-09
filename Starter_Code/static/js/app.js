@@ -2,37 +2,37 @@ document.addEventListener("DOMContentLoaded", function() {
   const url = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json";
 
   // Fetch the JSON data and console log it
-  d3.json(url).then(function(data) {
-    console.log(data);
+  d3.json(url).then(function(jsonData) {
+    console.log(jsonData);
 
-      // Function to build bubble chart
-    function buildBubbleChart(sample) {
-    var sampleData = data.samples.filter(obj => obj.id == sample)[0];
-    var trace = {
-      x: sampleData.otu_ids,
-      y: sampleData.sample_values,
-      mode: 'markers',
-      marker: {
-        size: sampleData.sample_values,
-        color: sampleData.otu_ids,
-        colorscale: 'Earth',
-        type: 'heatmap'
-      },
-      text: sampleData.otu_labels
-    };
-    var layout = {
-      title: "Bacteria Cultures Per Sample",
-      showlegend: false,
-      xaxis: { title: "OTU ID" },
-      yaxis: { title: "Sample Value" }
-    };
-    var data = [trace];
-    Plotly.newPlot("bubble", data, layout);
-  }
+    // Function to build bubble chart
+    function buildBubbleChart(sampleID) {
+      var sampleData = jsonData.samples.filter(obj => obj.id == sampleID)[0];
+      var trace = {
+        x: sampleData.otu_ids,
+        y: sampleData.sample_values,
+        mode: 'markers',
+        marker: {
+          size: sampleData.sample_values,
+          color: sampleData.otu_ids,
+          colorscale: 'Earth',
+          type: 'heatmap'
+        },
+        text: sampleData.otu_labels
+      };
+      var layout = {
+        title: "Bacteria Cultures Per Sample",
+        showlegend: false,
+        xaxis: { title: "OTU ID" },
+        yaxis: { title: "Sample Value" }
+      };
+      var data = [trace];
+      Plotly.newPlot("bubble", data, layout);
+    }
 
     // Function to build metadata panel
-    function buildMetadata(sample) {
-      var metadata = data.metadata.filter(obj => obj.id == sample)[0];
+    function buildMetadata(sampleID) {
+      var metadata = jsonData.metadata.filter(obj => obj.id == sampleID)[0];
       var metadataPanel = d3.select("#sample-metadata");
       metadataPanel.html("");
       Object.entries(metadata).forEach(([key, value]) => {
@@ -41,8 +41,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Function to build bar chart
-    function buildBarChart(sample) {
-      var sampleData = data.samples.filter(obj => obj.id == sample)[0];
+    function buildBarChart(sampleID) {
+      var sampleData = jsonData.samples.filter(obj => obj.id == sampleID)[0];
       var otuIds = sampleData.otu_ids.slice(0, 10).map(id => `OTU ${id}`);
       var sampleValues = sampleData.sample_values.slice(0, 10);
       var trace = {
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Function to initialize the dashboard and dropdown menu
     function init() {
       var dropdownMenu = d3.select("#selDataset");
-      var sampleNames = data.names;
+      var sampleNames = jsonData.names;
       sampleNames.forEach((name) => {
         dropdownMenu.append("option")
           .text(name)
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Initialize the dashboard
-    //init();
+    init();
 
     // Function for event listener
     function optionChanged(sampleID) {
